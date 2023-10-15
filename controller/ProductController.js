@@ -1,4 +1,4 @@
-const model = require("../model/ProductModel")
+const model = require("../model/productModel")
 const Products = model.Products;
 
 exports.postProduct = async (req, res) => {
