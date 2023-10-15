@@ -1,2 +1,5 @@
 node_modules
 package-lock.json
+/controller/CartController.js
+/model/CartModel.js
+/routes/CartRoutes.js
