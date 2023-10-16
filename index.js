@@ -22,7 +22,7 @@ server.use("/categories", CategoryRouter.router)
 server.use("/brands", BrandRouter.router)
 server.use("/users", UserRouter.router)
 server.use("/auth", AuthRouter.router)
-// server.use("/carts", CartRouter.router)
+server.use("/carts", CartRouter.router)
 
 
 server.listen(8000, () => {
