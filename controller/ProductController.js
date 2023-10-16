@@ -22,8 +22,13 @@ exports.patchProduct = async (req, res) => {
     }
 }
 exports.fetchAllProduct = async (req, res) => {
-    let query = Products.find({}) // all document
-    let totalquery = Products.find({}) // all document
+    let obj = {}
+    if(!req.query.admin)
+    {
+        obj.deleted={$ne:true}
+    }
+    let query = Products.find(obj) // all document
+    let totalquery = Products.find(obj) // all document
 
     if (req.query.category) {
         query = query.find({ category: req.query.category })

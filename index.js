@@ -6,6 +6,7 @@ const BrandRouter = require("./routes/BrandRoutes")
 const UserRouter = require("./routes/UserRoutes")
 const AuthRouter = require("./routes/AuthRoutes")
 const CartRouter = require("./routes/CartRoutes")
+const OrderRouter = require("./routes/OrderRoutes")
 var cors = require('cors')
 const server = express()
 
@@ -23,6 +24,7 @@ server.use("/brands", BrandRouter.router)
 server.use("/users", UserRouter.router)
 server.use("/auth", AuthRouter.router)
 server.use("/carts", CartRouter.router)
+server.use("/orders", OrderRouter.router)
 
 
 server.listen(8000, () => {
