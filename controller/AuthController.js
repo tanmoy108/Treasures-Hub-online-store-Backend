@@ -1,29 +1,35 @@
+const { filterValue } = require("../common/Common");
 const model = require("../model/UserModel")
 const Users = model.Users;
-
+const crypto = require("crypto")
+const jwt = require('jsonwebtoken');
+const SECRET_KEY = "SECRET_KEY"
 
 exports.PostUsers = async (req, res) => {
-    const User = new Users(req.body);
     try {
-        const docs = await User.save();
-        res.status(201).json(docs)
+        //for passport auth
+        var salt = crypto.randomBytes(16);
+        crypto.pbkdf2(req.body.password, salt, 310000, 32, 'sha256', async function (err, hashedPassword) {
+            const User = new Users({ ...req.body, password: hashedPassword, salt });
+            const docs = await User.save();
+            req.login(filterValue(docs), (err) => { // eta add korle signup korlei matro access korte parbe 
+                if (err) {
+                    res.status(400).json(error)
+                }
+                else{
+                    var token = jwt.sign(filterValue(docs), SECRET_KEY);
+                    res.status(201).json(token)
+                }
+            })
+        })
     } catch (error) {
         res.status(400).json(error)
     }
 }
 
-exports.CheckUsers = async (req, res) => {
-    try {
-        const oneUser = await Users.findOne({ email: req.body.email })
-
-        if (!oneUser) {
-            res.status(401).json({ status: "user not found" })
-        } else {
-            if (oneUser.password === req.body.password) {
-                res.status(201).json(oneUser)
-            } else res.status(401).json({status:"wrong information"})
-        }
-    } catch (err) {
-        res.status(400).json({status:"wrong information"})
-    }
+exports.LoginUsers = async (req, res) => {
+    res.json(req.user)
+}
+exports.Check = async (req, res) => {
+    res.json({status:"success",user:req.user})
 }
