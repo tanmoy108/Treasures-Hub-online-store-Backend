@@ -1,6 +1,7 @@
 const { filterValue } = require("../common/Common");
 const model = require("../model/UserModel")
 const Users = model.Users;
+
 const crypto = require("crypto")
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = "SECRET_KEY"
@@ -18,7 +19,7 @@ exports.PostUsers = async (req, res) => {
                 }
                 else{
                     var token = jwt.sign(filterValue(docs), SECRET_KEY);
-                    res.status(201).json(token)
+                    res.cookie('jwt', token,{ expires: new Date(Date.now() + 3600000), httpOnly: true }).status(201).json(token)
                 }
             })
         })
