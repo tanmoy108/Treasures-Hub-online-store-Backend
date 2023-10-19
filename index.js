@@ -20,6 +20,7 @@ const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser')
+const path = require('path');
 const server = express()
 
 
@@ -65,7 +66,7 @@ server.post('/webhook', express.raw({type: 'application/json'}), (request, respo
 
 //middleware
 //for passport auth
-server.use(express.static("build"))
+server.use(express.static(path.resolve(__dirname,"build")))
 server.use(cookieParser())
 server.use(session({
   secret: process.env.SESSION_KEY,
@@ -86,6 +87,12 @@ server.use("/users",isAuth(), UserRouter.router)
 server.use("/auth", AuthRouter.router)
 server.use("/carts",isAuth(), CartRouter.router)
 server.use("/orders",isAuth(), OrderRouter.router)
+
+// this line we add to make react router work in case of other routes doesnt match
+server.get('*', (req, res) =>
+  res.sendFile(path.resolve('build', 'index.html'))
+);
+
 
 //for passport auth
 passport.use('local', new LocalStrategy(
@@ -149,13 +156,16 @@ const stripe = require("stripe")(process.env.STRIPE_KEY);
 
 
 server.post("/create-payment-intent", async (req, res) => {
-  const { price } = req.body;
+  const { price,order_id } = req.body;
   const paymentIntent = await stripe.paymentIntents.create({
     amount: price*100,
     currency: "usd",
     automatic_payment_methods: {
       enabled: true,
     },
+    metadata:{
+      order_id
+    }
   });
 
   res.send({
