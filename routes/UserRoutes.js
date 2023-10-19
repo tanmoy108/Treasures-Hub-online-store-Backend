@@ -3,7 +3,7 @@ const UserController = require('../controller/UserController')
 const router = express.Router()
 
 router
-    .get("/:id", UserController.fetchUserInfo)
-    .patch("/:id", UserController.PatchUsers )
+    .get("/info", UserController.fetchUserInfo)
+    .patch("/update", UserController.PatchUsers )
 
 exports.router = router

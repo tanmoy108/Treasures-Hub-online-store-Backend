@@ -4,7 +4,6 @@ const Users = model.Users;
 
 const crypto = require("crypto")
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = "SECRET_KEY"
 
 exports.PostUsers = async (req, res) => {
     try {
@@ -17,9 +16,11 @@ exports.PostUsers = async (req, res) => {
                 if (err) {
                     res.status(400).json(error)
                 }
-                else{
-                    var token = jwt.sign(filterValue(docs), SECRET_KEY);
-                    res.cookie('jwt', token,{ expires: new Date(Date.now() + 3600000), httpOnly: true }).status(201).json(token)
+                else {
+                    var token = jwt.sign(filterValue(docs), process.env.SECRET_KEY);
+                    res.cookie('jwt', token, { expires: new Date(Date.now() + 3600000), httpOnly: true }).json({ id: docs.id, role: docs.role })
+
+                    // res.status(201).json(token) //token asbe ekta
                 }
             })
         })
@@ -29,8 +30,19 @@ exports.PostUsers = async (req, res) => {
 }
 
 exports.LoginUsers = async (req, res) => {
-    res.json(req.user)
+    const user = req.user;
+    try {
+        console.log("loginUseer 33", req.user)
+        res.cookie('jwt', req.user.token, { expires: new Date(Date.now() + 3600000), httpOnly: true }).json({ id: user.id, role: user.role })
+        // res.json(req.user) // id , role from serializerUser
+    } catch (err) {
+        console.log("login error:", err)
+    }
 }
-exports.Check = async (req, res) => {
-    res.json({status:"success",user:req.user})
+exports.CheckAuth = async (req, res) => {
+    try {
+        res.json(req.user)
+    } catch (err) {
+        console.log("check error", err)
+    }
 }

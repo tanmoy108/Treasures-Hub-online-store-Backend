@@ -2,11 +2,11 @@ const model = require("../model/OrderModel")
 const Orders = model.Orders;
 
 exports.PostOrder = async (req, res) => {
-    const Order = new Orders(req.body)
+    const { id } = req.user;
+    const Order = new Orders({...req.body,userId:id})
     try {
         const doc = await Order.save()
         res.status(201).json(doc)
-        console.log("order added");
     } catch (error) {
         res.status(400).json(error)
     }
@@ -16,7 +16,6 @@ exports.PatchOrder = async (req, res) => {
     try {
         const doc = await Orders.findByIdAndUpdate(id,req.body,{new:true})
         res.status(201).json(doc)
-        console.log("updated");
     } catch (error) {
         res.status(400).json(error)
     }
@@ -31,7 +30,6 @@ exports.GetOrder = async (req, res) => {
         const limit = req.query._limit
         query = query.skip(limit * (page - 1)).limit(limit)
     }
-    console.log(req.query)
 
     try {
         const doc = await query.exec()
@@ -43,11 +41,10 @@ exports.GetOrder = async (req, res) => {
 }
 
 exports.fetchOrderById = async (req, res) => {
-    const {userId} = req.query
+    const { id } = req.user;
     try {
-        const doc = await Orders.find({userId:userId})
+        const doc = await Orders.find({userId:id})
         res.status(201).json(doc)
-        console.log("get order by id");
     } catch (error) {
         res.status(400).json(error)
     }

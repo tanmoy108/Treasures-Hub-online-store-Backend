@@ -6,7 +6,6 @@ exports.postProduct = async (req, res) => {
     try {
         const doc = await Product.save()
         res.status(201).json(doc)
-        console.log("added");
     } catch (error) {
         res.status(400).json(error)
     }
@@ -16,7 +15,6 @@ exports.patchProduct = async (req, res) => {
     try {
         const doc = await Products.findByIdAndUpdate(id,req.body,{new:true})
         res.status(201).json(doc)
-        console.log("updated");
     } catch (error) {
         res.status(400).json(error)
     }
@@ -51,14 +49,12 @@ exports.fetchAllProduct = async (req, res) => {
         const limit = req.query._limit
         query = query.skip(limit * (page - 1)).limit(limit)
     }
-    console.log(req.query)
 
 
     try {
         const doc = await query.exec()
         res.set("X-Total-Count", totalDoc)
         res.status(201).json(doc)
-        console.log("filtered");
     } catch (error) {
         res.status(400).json(error)
     }
@@ -68,7 +64,6 @@ exports.fetchProductById = async (req, res) => {
     try {
         const doc = await Products.findById(id)
         res.status(201).json(doc)
-        console.log("success with id");
     } catch (error) {
         res.status(400).json(error)
     }

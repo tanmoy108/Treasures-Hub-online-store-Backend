@@ -6,6 +6,6 @@ const passport = require("passport")
 router
     .post("/signup", AuthController.PostUsers)
     .post("/signin",passport.authenticate("local"), AuthController.LoginUsers)
-    .get("/check", passport.authenticate("jwt"),AuthController.Check)
+    .get("/check", passport.authenticate("jwt"),AuthController.CheckAuth)
 
 exports.router = router

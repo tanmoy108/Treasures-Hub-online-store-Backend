@@ -1,5 +1,6 @@
 const express = require("express")
 const mongoose = require('mongoose');
+require('dotenv').config()
 const ProductRouter = require("./routes/ProductRoutes")
 const CategoryRouter = require("./routes/CategoryRoutes")
 const BrandRouter = require("./routes/BrandRoutes")
@@ -11,24 +12,27 @@ const cors = require('cors')
 const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const { Users } = require("./model/UserModel");
-const { isAuth, filterValue } = require("./common/Common");
+const model = require("./model/UserModel")
+const Users = model.Users;
+const { isAuth, filterValue, cookieExtractor } = require("./common/Common");
 const crypto = require("crypto")
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser')
 const server = express()
 
 
 //for jwt
-const SECRET_KEY = "SECRET_KEY"
+
 var opts = {}
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = SECRET_KEY;
+opts.jwtFromRequest = cookieExtractor;
+// opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.secretOrKey = process.env.SECRET_KEY;
 //.........................
 
 //webhook
-const endpointSecret = "whsec_2a36fb0150a4d2d6e11310a61bda65ea6ea6fa74462db46d05cab440c860c6e3";
+const endpointSecret = process.env.END_POINT;
 
 server.post('/webhook', express.raw({type: 'application/json'}), (request, response) => {
   const sig = request.headers['stripe-signature'];
@@ -61,24 +65,27 @@ server.post('/webhook', express.raw({type: 'application/json'}), (request, respo
 
 //middleware
 //for passport auth
+server.use(express.static("build"))
+server.use(cookieParser())
 server.use(session({
-  secret: 'keyboard cat',
+  secret: process.env.SESSION_KEY,
   resave: false, // don't save session if unmodified
   saveUninitialized: false, // don't create session until something stored
 }));
+
 server.use(passport.authenticate('session'));
 //....................................
 
 
 server.use(cors({ exposedHeaders: ["X-Total-Count"] }))
 server.use(express.json())
-server.use("/products", ProductRouter.router)
-server.use("/categories", CategoryRouter.router)
-server.use("/brands", BrandRouter.router)
-server.use("/users", UserRouter.router)
+server.use("/products",isAuth(),ProductRouter.router)
+server.use("/categories",isAuth(), CategoryRouter.router)
+server.use("/brands",isAuth(), BrandRouter.router)
+server.use("/users",isAuth(), UserRouter.router)
 server.use("/auth", AuthRouter.router)
-server.use("/carts", CartRouter.router)
-server.use("/orders", OrderRouter.router)
+server.use("/carts",isAuth(), CartRouter.router)
+server.use("/orders",isAuth(), OrderRouter.router)
 
 //for passport auth
 passport.use('local', new LocalStrategy(
@@ -94,7 +101,8 @@ passport.use('local', new LocalStrategy(
           done(null, false, { status: "invalid credentials" })
         }
         var token = jwt.sign(filterValue(oneUser), SECRET_KEY);
-        done(null, filterValue(oneUser))
+        // done(null, {token})
+        done(null, { id: oneUser.id, role: oneUser.role,token })
       })
 
     } catch (err) {
@@ -106,8 +114,10 @@ passport.use('local', new LocalStrategy(
 //for jwt
 passport.use('jwt', new JwtStrategy(opts, async function (jwt_payload, done) {
   try {
-    const user = await Users.findOne({ id: jwt_payload.sub });
+    console.log("index.js 109",jwt_payload)
+    const user = await Users.findById(jwt_payload.id);
     if (user) {
+      // return done(null,user);
       return done(null, filterValue(user));
     } else return done(null, false);
 
@@ -120,12 +130,14 @@ passport.use('jwt', new JwtStrategy(opts, async function (jwt_payload, done) {
 //for passport auth
 passport.serializeUser(function (oneUser, cb) {
   process.nextTick(function () {
-    return cb(null, filterValue(oneUser));
+    console.log("serializerUser 123",filterValue(oneUser))
+    return cb(null, { id: oneUser.id, role: oneUser.role });
   });
 });
 
 passport.deserializeUser(function (oneUser, cb) {
   process.nextTick(function () {
+    console.log("deserializerUser 130",oneUser)
     return cb(null, oneUser);
   });
 });
@@ -133,12 +145,11 @@ passport.deserializeUser(function (oneUser, cb) {
 
 //payment intent
 // This is your test secret API key.
-const stripe = require("stripe")('sk_test_51O2TiUGzahrlcm9m5rRNXPu8eMGGomOHEc9GTYEGLq3eU4Z96nf0VjvsEWgANuu6mURaXxFrg4lSTf3vjwnjEUpV00cMHqw79q');
+const stripe = require("stripe")(process.env.STRIPE_KEY);
 
 
 server.post("/create-payment-intent", async (req, res) => {
   const { price } = req.body;
-  console.log(price)
   const paymentIntent = await stripe.paymentIntents.create({
     amount: price*100,
     currency: "usd",
@@ -157,9 +168,9 @@ server.post("/create-payment-intent", async (req, res) => {
 
 main().catch(err => console.log(err));
 async function main() {
-  await mongoose.connect('mongodb://127.0.0.1:27017/treasurehub');
+  await mongoose.connect(process.env.DB);
   console.log("database connected")
 }
-server.listen(8000, () => {
+server.listen(process.env.PORT, () => {
   console.log("server started");
 })
