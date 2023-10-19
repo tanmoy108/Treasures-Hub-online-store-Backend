@@ -107,7 +107,7 @@ passport.use('local', new LocalStrategy(
         if (!crypto.timingSafeEqual(oneUser.password, hashedPassword)) {
           done(null, false, { status: "invalid credentials" })
         }
-        var token = jwt.sign(filterValue(oneUser), SECRET_KEY);
+        var token = jwt.sign(filterValue(oneUser), process.env.SECRET_KEY);
         // done(null, {token})
         done(null, { id: oneUser.id, role: oneUser.role,token })
       })
