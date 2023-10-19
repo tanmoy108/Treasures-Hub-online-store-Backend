@@ -14,7 +14,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const model = require("./model/UserModel")
 const Users = model.Users;
-const { isAuth, filterValue, cookieExtractor } = require("./common/Common");
+const { isAuth, filterValue, cookieExtractor,hasTokenInCookie } = require("./common/Common");
 const crypto = require("crypto")
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
@@ -80,10 +80,45 @@ server.use(passport.authenticate('session'));
 
 server.use(cors({ exposedHeaders: ["X-Total-Count"] }))
 server.use(express.json())
-server.use("/products",isAuth(),ProductRouter.router)
-server.use("/categories",isAuth(), CategoryRouter.router)
-server.use("/brands",isAuth(), BrandRouter.router)
-server.use("/users",isAuth(), UserRouter.router)
+server.use("/products", (req, res, next) => {
+  if (hasTokenInCookie(req)) {
+      // If the 'jwt' cookie exists, apply the isAuth middleware
+      isAuth()(req, res, next);
+  } else {
+      // If no 'jwt' cookie, proceed without authentication
+      next();
+  }
+}, ProductRouter.router);
+
+server.use("/categories", (req, res, next) => {
+  if (hasTokenInCookie(req)) {
+      // If the 'jwt' cookie exists, apply the isAuth middleware
+      isAuth()(req, res, next);
+  } else {
+      // If no 'jwt' cookie, proceed without authentication
+      next();
+  }
+}, CategoryRouter.router);
+
+server.use("/brands", (req, res, next) => {
+  if (hasTokenInCookie(req)) {
+      // If the 'jwt' cookie exists, apply the isAuth middleware
+      isAuth()(req, res, next);
+  } else {
+      // If no 'jwt' cookie, proceed without authentication
+      next();
+  }
+}, BrandRouter.router);
+
+server.use("/users", (req, res, next) => {
+  if (hasTokenInCookie(req)) {
+      // If the 'jwt' cookie exists, apply the isAuth middleware
+      isAuth()(req, res, next);
+  } else {
+      // If no 'jwt' cookie, proceed without authentication
+      next();
+  }
+}, UserRouter.router);
 server.use("/auth", AuthRouter.router)
 server.use("/carts",isAuth(), CartRouter.router)
 server.use("/orders",isAuth(), OrderRouter.router)

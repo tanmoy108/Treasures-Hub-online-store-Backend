@@ -3,6 +3,7 @@ const Users = model.Users;
 
 exports.fetchUserInfo = async (req, res) => {
     console.log("fetchUser",req.user)
+    // console.log(req.headers.Set-Cookie)
     const { id } = req.user;
     try {
         const docs = await Users.findById(id)

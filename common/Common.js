@@ -16,6 +16,9 @@ exports.cookieExtractor = function(req) {
     return token;
 };
 
+exports.hasTokenInCookie = function (req) {
+    return !!req.cookies && req.cookies.jwt; // Check if the 'jwt' cookie exists
+};
 
 
 
