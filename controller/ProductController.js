@@ -1,5 +1,4 @@
-const path = require("path")
-const model = require(path.resolve(__dirname,"../model/productModel"))
+const model = require("./model/productModel")
 const Products = model.Products;
 
 exports.postProduct = async (req, res) => {
