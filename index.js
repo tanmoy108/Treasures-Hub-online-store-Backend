@@ -66,7 +66,7 @@ server.post('/webhook', express.raw({type: 'application/json'}), (request, respo
 
 //middleware
 //for passport auth
-// server.use(express.static(path.resolve(__dirname,"build")))
+server.use(express.static(path.resolve(__dirname,"build")))
 server.use(cookieParser())
 server.use(session({
   secret: process.env.SESSION_KEY,
