@@ -1,13 +1,6 @@
 const express = require("express")
 const mongoose = require('mongoose');
 require('dotenv').config()
-const ProductRouter = require("./routes/ProductRoutes")
-const CategoryRouter = require("./routes/CategoryRoutes")
-const BrandRouter = require("./routes/BrandRoutes")
-const UserRouter = require("./routes/UserRoutes")
-const AuthRouter = require("./routes/AuthRoutes")
-const CartRouter = require("./routes/CartRoutes")
-const OrderRouter = require("./routes/OrderRoutes")
 const cors = require('cors')
 const session = require('express-session');
 const passport = require('passport');
@@ -21,6 +14,13 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser')
 const path = require('path');
+const CategoryRouter = require("./routes/CategoryRoutes")
+const ProductRouter = require("./routes/ProductRoutes")
+const BrandRouter = require("./routes/BrandRoutes")
+const UserRouter = require("./routes/UserRoutes")
+const AuthRouter = require("./routes/AuthRoutes")
+const CartRouter = require("./routes/CartRoutes")
+const OrderRouter = require("./routes/OrderRoutes")
 const server = express()
 
 
@@ -66,7 +66,7 @@ server.post('/webhook', express.raw({type: 'application/json'}), (request, respo
 
 //middleware
 //for passport auth
-server.use(express.static(path.resolve(__dirname,"build")))
+// server.use(express.static(path.resolve(__dirname,"build")))
 server.use(cookieParser())
 server.use(session({
   secret: process.env.SESSION_KEY,
