@@ -28,7 +28,7 @@ productSchema.set('toJSON',{
     transform: function (doc,ret) { delete ret._id}
 })
 
-exports.Products = model('Products', productSchema)
+const Products = model('Products', productSchema)
 
 
 
@@ -51,42 +51,40 @@ exports.patchProduct = async (req, res) => {
     }
 }
 exports.fetchAllProduct = async (req, res) => {
+    let obj = {}
+    if(!req.query.admin)
+    {
+        obj.deleted={$ne:true}
+    }
+    let query = Products.find(obj) // all document
+    let totalquery = Products.find(obj) // all document
+
+    if (req.query.category) {
+        query = query.find({ category: req.query.category })
+        totalquery = totalquery.find({ category: req.query.category })
+    }
+    if (req.query.brand) {
+        query = query.find({ brand: req.query.brand })
+        totalquery = totalquery.find({ category: req.query.brand })
+    }
+
+    if (req.query._sort && req.query._order) {
+        query = query.sort({ [req.query._sort]: req.query._order })
+    }
+
+    const totalDoc = await totalquery.count().exec();
+
+
+    if (req.query._page && req.query._limit) {
+        const page = req.query._page
+        const limit = req.query._limit
+        query = query.skip(limit * (page - 1)).limit(limit)
+    }
+
 
     try {
-
-        let obj = {}
-        if(!req.query.admin)
-        {
-            obj.deleted={$ne:true}
-        }
-        let query = Products.find(obj) // all document
-        let totalquery = Products.find(obj) // all document
-    
-        if (req.query.category) {
-            query = query.find({ category: req.query.category })
-            totalquery = totalquery.find({ category: req.query.category })
-        }
-        if (req.query.brand) {
-            query = query.find({ brand: req.query.brand })
-            totalquery = totalquery.find({ category: req.query.brand })
-        }
-    
-        if (req.query._sort && req.query._order) {
-            query = query.sort({ [req.query._sort]: req.query._order })
-        }
-    
-        const totalDoc = await totalquery.count().exec();
-    
-    
-        if (req.query._page && req.query._limit) {
-            const page = req.query._page
-            const limit = req.query._limit
-            query = query.skip(limit * (page - 1)).limit(limit)
-        }
-    
-
-
         const doc = await query.exec()
+        console.log(doc)
         res.set("X-Total-Count", totalDoc)
         res.status(201).json(doc)
     } catch (error) {
