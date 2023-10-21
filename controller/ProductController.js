@@ -83,8 +83,7 @@ exports.fetchAllProduct = async (req, res) => {
 
 
     try {
-        const doc = await query.exec()
-        console.log(doc)
+        const doc = await query.exec() 
         res.set("X-Total-Count", totalDoc)
         res.status(201).json(doc)
     } catch (error) {
