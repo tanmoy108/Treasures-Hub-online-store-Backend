@@ -3,7 +3,7 @@ const { Schema, model } = mongoose;
 
 const orderSchema = new Schema({
     products: { type: [Schema.Types.Mixed], required: true},
-    price: { type: Number},
+    price: { type: Number,required:true},
     quantity: { type: Number,required:true },
     method: { type: String, required: true },
     status: { type: String, required: true,default:"pending" },
